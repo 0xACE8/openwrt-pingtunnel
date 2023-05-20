@@ -47,7 +47,9 @@ define Package/pingtunnel/install
 endef
 
 define Package/pingtunnel/description
-  Pingtunnel is a tool that send TCP/UDP traffic over ICMP.
+  By forging ping, the tcp/udp/sock5 traffic is forwarded to the destination 
+  server through the remote server. Used to break certain operators to block 
+  TCP/UDP traffic.
 endef
 
 
