@@ -1,51 +1,55 @@
-# SPDX-License-Identifier: MIT
 #
-# Copyright (c) 2017 Yu Wang <wangyucn@gmail.com>
+# Copyright (C) 2019-2023 0xACE7
+#
+# This is free software, This is free software, licensed under MIT.
+# See /LICENSE for more information.
+#
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=pingtunnel
-PKG_VERSION:=20230206.0
+PKG_VERSION:=2.7
 PKG_RELEASE:=$(AUTORELEASE)
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/wangyu-/pingtunnel/tar.gz/$(PKG_VERSION)?
-PKG_HASH:=1e459020654d3c65acb252a56fe11a5e2feec5a64d6e2ffd0aacc14213bbc9c0
+PKG_SOURCE_URL:=https://codeload.github.com/esrrhs/$(PKG_NAME)/tar.gz/$(PKG_VERSION)?
+PKG_HASH:=bd346e18998fde0f731023f58421251e4ef845225c94b194fb6413ad8d48ea68
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
+PKG_MAINTAINER:=0xACE7
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
-PKG_MAINTAINER:=Yu Wang
 
+PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 
+GO_PKG:=github.com/esrrhs/pingtunnel
+
 include $(INCLUDE_DIR)/package.mk
+include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
+
+GO_MOD_ARGS:=
+GO_PKG_BUILD_VARS+= GO111MODULE=off
 
 define Package/pingtunnel
   SECTION:=net
   CATEGORY:=Network
-  TITLE:=Tunnel which turns UDP Traffic into Encrypted Traffic
-  URL:=https://github.com/wangyu-/pingtunnel
-  DEPENDS:=+libstdcpp +libpthread +librt
-  PROVIDES:=pingtunnel-tunnel
-endef
-
-define Package/pingtunnel/description
-  pingtunnel-tunnel is a tunnel which turns UDP Traffic into Encrypted FakeTCP/UDP/ICMP Traffic by using Raw Socket.
-endef
-
-MAKE_FLAGS += cross
-
-define Build/Prepare
-	$(PKG_UNPACK)
-	sed -i 's/cc_cross=.*/cc_cross=$(TARGET_CXX)/g' $(PKG_BUILD_DIR)/makefile
-	sed -i '/\*gitversion/d' $(PKG_BUILD_DIR)/makefile
-	echo 'const char *gitversion = "$(PKG_VERSION)";' > $(PKG_BUILD_DIR)/git_version.h
-	$(Build/Patch)
+  TITLE:=Pingtunnel is a tool that send TCP/UDP traffic over ICMP.
+  URL:=https://github.com/esrrhs/pingtunnel
+  DEPENDS:=$(GO_ARCH_DEPENDS)
 endef
 
 define Package/pingtunnel/install
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/pingtunnel_cross $(1)/usr/bin/pingtunnel
+	$(call GoPackage/Package/Install/Bin,$(PKG_INSTALL_DIR))
+
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/* $(1)/usr/sbin/
 endef
 
+define Package/pingtunnel/description
+  Pingtunnel is a tool that send TCP/UDP traffic over ICMP.
+endef
+
+
+$(eval $(call GoBinPackage,pingtunnel))
 $(eval $(call BuildPackage,pingtunnel))
